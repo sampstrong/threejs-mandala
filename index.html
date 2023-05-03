@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Parcel Sandbox</title>
+		<meta charset="UTF-8" />
+		<link rel="stylesheet" href="./src/styles.css" />
+	</head>
+
+	<body>
+		<div id="app">
+			<canvas class="threejs"></canvas>
+		</div>
+
+		<script id="vertex-shader" type="x-shader/x-vertex">
+			#define PI 3.14159265
+
+			uniform float uTime;
+			varying vec2 vUv;
+			varying vec3 vColor;
+
+			vec3 mandala()
+			{
+				vec3 c1 = vec3(0.3, 0.8, 0.6);
+				vec3 c2 = vec3(0.2, 0.5, 0.3);
+				vec3 c3 = vec3(0.4, 0.8, 0.9);
+				vec3 c4 = vec3(0.2, 0.5, 0.8);
+
+				vec2 newUv = uv;
+				newUv.x -= 0.5;
+				newUv.y -= 0.5;
+
+
+				float angle = atan(newUv.x, newUv.y);
+				float angle2 = angle - distance(vec2(0.0), newUv) * 2.0;
+				angle2 = sin(angle2 * PI * 6.05 + uTime * 2.0);
+				angle += distance(vec2(0.0), newUv) * 2.0;
+				angle = sin(angle * PI * 6.05 - uTime * 2.0);
+
+				vec3 angleColor = mix(c3, c4, angle);
+
+
+				vec3 angleColor2 = mix(c3, c4, angle2);
+
+
+				float circ1 = sin(length(newUv) * 50.0 - uTime);
+				float circ2 = sin(length(newUv) * 100.0 - uTime);
+
+				vec3 color = mix(c1, c2, circ1);
+				vec3 color2 = mix(c1, c2, circ2);
+
+				color *= color2;
+				//color *= angle;
+				color = max(angleColor2, max(color, angleColor));
+
+				float dist = distance(vec2(0.0), newUv);
+				float d = smoothstep(0.0, 0.5, dist);
+
+				vec3 overlay = mix(c1, c2, sin(uTime) * 0.5 + 0.5);
+
+				color *= 1.0 - d;
+
+				vec3 final = color * overlay;
+
+				return final;
+			}
+
+			void main()
+			{
+				vUv = uv;
+				vColor = mandala();
+
+				float elevation = 1.0 - vColor.g;
+				vec3 newPos = position;
+				newPos.z = elevation * 2.0;
+
+				gl_Position = projectionMatrix * modelViewMatrix * vec4(newPos, 1.0);
+			}
+		</script>
+
+		<script id="fragment-shader" type="x-shader/x-fragment">
+
+
+			uniform float uTime;
+			varying vec2 vUv;
+			varying vec3 vColor;
+
+			void main()
+			{
+					gl_FragColor = vec4(vColor, 1.0);
+			}
+		</script>
+
+		<script src="src/index.js"></script>
+	</body>
+</html>
