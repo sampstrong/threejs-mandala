@@ -1,2 +1,3 @@
 # threejs-mandala
-Created with CodeSandbox
+A 3D mandala created with glsl in three.js
+
